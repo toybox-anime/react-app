@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import toast from 'react-hot-toast'
 import { supabase } from '../lib/supabase'
 
 const QUERY_KEY = ['tasks']
@@ -24,7 +25,11 @@ export function useCreateTask() {
       if (error) throw error
       return data
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: QUERY_KEY }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEY })
+      toast.success('タスクを作成しました')
+    },
+    onError: () => toast.error('作成に失敗しました'),
   })
 }
 
@@ -36,7 +41,11 @@ export function useUpdateTask() {
       if (error) throw error
       return data
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: QUERY_KEY }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEY })
+      toast.success('タスクを更新しました')
+    },
+    onError: () => toast.error('更新に失敗しました'),
   })
 }
 
@@ -47,6 +56,10 @@ export function useDeleteTask() {
       const { error } = await supabase.from('tasks').delete().eq('id', id)
       if (error) throw error
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: QUERY_KEY }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEY })
+      toast.success('タスクを削除しました')
+    },
+    onError: () => toast.error('削除に失敗しました'),
   })
 }

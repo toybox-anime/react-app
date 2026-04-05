@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { useCreateTask, useUpdateTask } from '../hooks/useTasks'
 import { useTaskStore } from '../store/taskStore'
@@ -16,10 +16,14 @@ export default function TaskForm() {
   const { editingTask, closeModal } = useTaskStore()
   const createTask = useCreateTask()
   const updateTask = useUpdateTask()
+  const titleRef = useRef(null)
 
   const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm({
     defaultValues,
   })
+
+  // タイトルに自動フォーカス
+  const { ref: registerRef, ...titleRest } = register('title', { required: 'タイトルは必須です' })
 
   useEffect(() => {
     if (editingTask) {
@@ -34,6 +38,9 @@ export default function TaskForm() {
     } else {
       reset(defaultValues)
     }
+    // 少し遅らせてフォーカス（アニメーション後）
+    const timer = setTimeout(() => titleRef.current?.focus(), 50)
+    return () => clearTimeout(timer)
   }, [editingTask, reset])
 
   const onSubmit = async (data) => {
@@ -58,7 +65,11 @@ export default function TaskForm() {
           タイトル <span className="text-red-500">*</span>
         </label>
         <input
-          {...register('title', { required: 'タイトルは必須です' })}
+          {...titleRest}
+          ref={(e) => {
+            registerRef(e)
+            titleRef.current = e
+          }}
           className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
           placeholder="タスクのタイトル"
         />
